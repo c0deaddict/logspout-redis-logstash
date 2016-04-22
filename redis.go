@@ -225,7 +225,7 @@ func splitImage(image_tag string) (image string, tag string) {
 func escapeLabels(labels map[string]string) map[string]string {
 	result := make(map[string]string)
 	for k, v := range labels {
-		result[k] = strings.Replace(v, ".", "_")
+		result[k] = strings.Replace(v, ".", "_", -1)
 	}
 	return result
 }
