@@ -222,6 +222,14 @@ func splitImage(image_tag string) (image string, tag string) {
 	return
 }
 
+func escapeLabels(map[string]string labels) map[string]string {
+	result := make(map[string]string)
+	for k, v := range labels {
+		result[k] = strings.Replace(v, ".", "_")
+	}
+	return result
+}
+
 func createLogstashMessage(m *router.Message, docker_host string, use_v0 bool, logstash_type string) ([]byte, error) {
 	image, image_tag := splitImage(m.Container.Config.Image)
 	cid := m.Container.ID[0:12]
@@ -241,7 +249,7 @@ func createLogstashMessage(m *router.Message, docker_host string, use_v0 bool, l
 		msg.Fields.Docker.ImageTag = image_tag
 		msg.Fields.Docker.Source = m.Source
 		msg.Fields.Docker.DockerHost = docker_host
-		msg.Fields.Docker.Labels = m.Container.Config.Labels
+		msg.Fields.Docker.Labels = escapeLabels(m.Container.Config.Labels)
 
 		return json.Marshal(msg)
 	} else {
@@ -256,7 +264,7 @@ func createLogstashMessage(m *router.Message, docker_host string, use_v0 bool, l
 		msg.Fields.ImageTag = image_tag
 		msg.Fields.Source = m.Source
 		msg.Fields.DockerHost = docker_host
-		msg.Fields.Labels = m.Container.Config.Labels
+		msg.Fields.Labels = escapeLabels(m.Container.Config.Labels)
 
 		// Check if the message to log itself is json
 		if validJsonMessage(strings.TrimSpace(m.Data)) {
